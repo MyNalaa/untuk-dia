@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Untuk Kamu 🤍</title>
+    <style>
+        /* ================= CSS / STYLING ================= */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --pink-bg: #fff0f5;
+            --pink-primary: #ff6b81;
+            --pink-dark: #d81b60;
+            --white: #ffffff;
+            --text-color: #4a4a4a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--pink-bg);
+            color: var(--text-color);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+        }
+
+        /* Cursor Custom (Hanya aktif di desktop) */
+        @media (min-width: 769px) {
+            .cursor-heart {
+                position: absolute;
+                width: 20px;
+                height: 20px;
+                background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ff6b81"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>') no-repeat center;
+                pointer-events: none;
+                z-index: 9999;
+                transform: translate(-50%, -50%);
+                transition: transform 0.05s ease;
+            }
+        }
+
+        /* Loading Screen */
+        #loading {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--pink-primary);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            z-index: 1000;
+            transition: opacity 1s ease;
+            padding: 20px;
+            text-align: center;
+        }
+        .pulse { animation: pulseHeart 1.5s infinite; }
+
+        /* Floating Hearts Background */
+        .hearts-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .heart-float { position: absolute; color: rgba(255, 107, 129, 0.4); font-size: 20px; animation: floatUp 10s linear infinite; bottom: -5vh; }
+
+        /* Pages Container (Mendukung scroll jika teks panjang di layar kecil) */
+        .page {
+            display: none;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            text-align: center;
+            width: 92%;
+            max-width: 550px;
+            z-index: 10;
+            animation: fadeIn 1s ease;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(255, 107, 129, 0.2);
+            backdrop-filter: blur(8px);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .page.active { display: flex; }
+
+        /* Kustomisasi scrollbar untuk container halaman */
+        .page::-webkit-scrollbar { width: 6px; }
+        .page::-webkit-scrollbar-track { background: transparent; }
+        .page::-webkit-scrollbar-thumb { background: rgba(255, 107, 129, 0.3); border-radius: 10px; }
+
+        h1 { color: var(--pink-dark); margin-bottom: 15px; font-size: 1.8rem; font-weight: 700; }
+        h2 { color: var(--pink-dark); font-size: 1.4rem; margin-bottom: 10px; }
+        p { font-size: 1rem; line-height: 1.6; margin-bottom: 20px; text-align: justify; }
+
+        /* Buttons */
+        button {
+            padding: 12px 28px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            background: var(--pink-primary);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 107, 129, 0.4);
+            margin: 10px;
+            flex-shrink: 0;
+        }
+        button:hover { background: var(--pink-dark); transform: scale(1.05); }
+        .btn-outline { background: transparent; color: var(--pink-primary); border: 2px solid var(--pink-primary); box-shadow: none; }
+        .btn-outline:hover { background: var(--pink-primary); color: white; }
+
+        /* Slideshow / Bingkai Foto */
+        .slide-container { width: 100%; height: 280px; background: #ffe4e1; border-radius: 15px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .slide-container img { width: 100%; height: 100%; object-fit: cover; border-radius: 15px; }
+        .caption { position: absolute; bottom: 10px; background: rgba(255,255,255,0.85); padding: 6px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; color: var(--pink-dark); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+        /* Typing Effect Container */
+        .typing-container { width: 100%; text-align: left; margin-bottom: 15px; }
+        #typing-text { min-height: 100px; font-weight: 400; text-align: justify; white-space: pre-wrap; font-size: 0.95rem; }
+        .cursor { display: inline-block; width: 2px; height: 1.1em; background: var(--pink-dark); animation: blink 0.7s infinite; vertical-align: middle; margin-left: 2px; }
+
+        /* Question Buttons Container */
+        .btn-group { display: flex; gap: 15px; justify-content: center; align-items: center; flex-wrap: wrap; position: relative; width: 100%; min-height: 120px; margin-top: 15px; }
+        #btn-yes { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 20; }
+        #btn-no { transition: all 0.3s ease; z-index: 19; }
+
+        /* Audio Toggle */
+        #audio-toggle { position: fixed; top: 20px; right: 20px; background: white; width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 1.3rem; transition: transform 0.2s; }
+        #audio-toggle:active { transform: scale(0.9); }
+
+        /* Celebration */
+        .glow-text { text-shadow: 0 0 10px var(--pink-primary), 0 0 20px var(--pink-primary); animation: pulseHeart 1.5s infinite; color: var(--pink-dark); font-size: 2.2rem; margin-bottom: 15px; }
+
+        /* Responsive Layout Adjustments */
+        @media (max-width: 480px) {
+            h1 { font-size: 1.5rem; }
+            h2 { font-size: 1.2rem; }
+            p { font-size: 0.9rem; }
+            button { padding: 10px 22px; font-size: 1rem; }
+            .slide-container { height: 220px; }
+            #typing-text { font-size: 0.9rem; }
+        }
+
+        /* Keyframes */
+        @keyframes pulseHeart { 0% { transform: scale(1); } 50% { transform: scale(1.06); } 100% { transform: scale(1); } }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-110vh) scale(1.5); opacity: 0; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes blink { 50% { opacity: 0; } }
+        @keyframes rainFall { 0% { transform: translateY(-10vh) rotate(0deg); } 100% { transform: translateY(110vh) rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop>
+        <source src="bimbang.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="audio-toggle">🎵</div>
+    <div class="cursor-heart"></div>
+    <div class="hearts-bg" id="hearts-bg"></div>
+
+    <div id="loading">
+        <div class="pulse">Bentar yaww nalaa... 🤍</div>
+    </div>
+
+    <div class="page active" id="page1" style="justify-content: center;">
+        <h1 class="pulse">Aku mw ngomong sesuatu...</h1>
+        <p style="text-align: center;">Ada hal penting yang udah lamaaa banget pengen aku sampaiin langsung ke kamu.</p>
+        <button onclick="nextPage(1, 2)">Buka Kejutan 🤍</button>
+    </div>
+
+    <div class="page" id="page2" style="justify-content: center;">
+        <h1>With Youu ✨</h1>
+        <div class="slide-container">
+            <img id="slide-img" src="https://i.imgur.com/O8YwZna.jpeg" alt="Foto Kenangan">
+            <div class="caption" id="slide-caption">Setiap Waktu Yang Kita Habiskan Aku Tidak Akan Melupakannua</div>
+        </div>
+        <button onclick="nextPage(2, 3)">Lanjut ➜</button>
+    </div>
+
+    <div class="page" id="page3">
+        <h1>Untuk Kamu... 💌</h1>
+        <div class="typing-container">
+            <span id="typing-text"></span><span class="cursor"></span>
+        </div>
+        <button id="btn-lanjut-tanya" style="display: none; margin-top: 10px;" onclick="nextPage(3, 4)">Aku Punya Pertanyaan... 🥺</button>
+    </div>
+
+    <div class="page" id="page4" style="justify-content: center;">
+        <h1> Nalaa, Will You Be My Girlfriend? </h1>
+        <div class="btn-group">
+            <button id="btn-yes" onclick="showCelebration()">YES 🤍</button>
+            <button id="btn-no" class="btn-outline">NO 💔</button>
+        </div>
+    </div>
+
+    <div class="page" id="page5" style="justify-content: center;">
+        <h1 class="glow-text">🎉 YAYYYY!!! 🎉</h1>
+        <h2>🤍 FINALLY KAMU SEKARANG PACAR AKHU 🤍</h2>
+        <p style="margin-top: 15px; font-weight: 600; text-align: center; color: var(--pink-dark);">Makasi udah mw jadi pacar aku 🥺🥺</p>
+        <p style="text-align: center;">I love youuu! 🤍</p>
+        <button onclick="resetAnimation()">Ulangi Animasi 🔄</button>
+    </div>
+
+    <script>
+        /* ================= JAVASCRIPT / LOGIKA ================= */
+        
+        // --- Custom Cursor Desktop ---
+        const cursor = document.querySelector('.cursor-heart');
+        if (cursor) {
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            });
+        }
+
+        // --- Loading Screen & BGM ---
+        const bgMusic = document.getElementById("bgMusic");
+        const audioToggle = document.getElementById("audio-toggle");
+        let isPlaying = false;
+
+        window.onload = () => {
+            setTimeout(() => {
+                const loadingScreen = document.getElementById('loading');
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => { loadingScreen.style.display = 'none'; }, 1000);
+            }, 2000);
+            createFloatingHearts();
+        };
+
+        function toggleMusic() {
+            if (isPlaying) {
+                bgMusic.pause();
+                audioToggle.innerText = "🔇";
+            } else {
+                bgMusic.play().catch(err => console.log("Audio play diblokir browser, butuh interaksi pengguna."));
+                audioToggle.innerText = "🎵";
+            }
+            isPlaying = !isPlaying;
+        }
+
+        audioToggle.addEventListener('click', toggleMusic);
+
+        // --- Navigasi Halaman ---
+        function nextPage(current, next) {
+            // Putar musik secara otomatis begitu tombol di halaman pertama di-klik
+            if (current === 1 && !isPlaying) {
+                toggleMusic();
+            }
+            
+            document.getElementById(`page${current}`).classList.remove('active');
+            document.getElementById(`page${next}`).classList.add('active');
+
+            if (next === 3) {
+                startTyping();
+            }
+        }
+
+        // --- Floating Hearts Background ---
+        function createFloatingHearts() {
+            const container = document.getElementById('hearts-bg');
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.classList.add('heart-float');
+                heart.innerHTML = '🩵';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = (Math.random() * 4 + 5) + 's';
+                heart.style.fontSize = (Math.random() * 15 + 10) + 'px';
+                container.appendChild(heart);
+                setTimeout(() => { heart.remove(); }, 9000);
+            }, 600);
+        }
+        
+        // --- Surat Cinta Typing Effect ---
+        const isiSurat = "Tidak terasa sudah sekitar 2,5 tahun kita saling mengenal dan menjalani masa pendekatan ini. Selama waktu itu, banyak sekali hal yang sudah kita lewati bersama. Dari obrolan sederhana, cerita tentang keseharian, tawa, hingga berbagai momen yang mungkin terlihat biasa, tetapi sangat berarti bagiku.\n\nSelama ini aku selalu berusaha ada untukmu. Menjadi seseorang yang mendengarkan setiap ceritamu, termasuk cerita tentang orang-orang yang pernah hadir dalam hidupmu. Jujur, ada kalanya aku merasa sedih dan cemburu saat mendengar cerita tentang mantan atau laki-laki lain yang pernah kamu sukai. Namun, aku tetap memilih untuk mendengarkan, karena yang paling penting bagiku adalah melihatmu bahagia dan merasa nyaman saat berbagi cerita.\n\nSeiring berjalannya waktu, perasaanku tidak pernah berubah. Justru semakin hari aku semakin yakin bahwa kamu adalah seseorang yang ingin aku perjuangkan. Bukan karena aku melihatmu sempurna, tetapi karena aku menerima segala hal tentang dirimu dan tetap ingin berada di sisimu.\n\nHari ini aku ingin menyampaikan sesuatu yang sudah lama aku simpan di dalam hati.\n\nAku tidak ingin lagi hanya menjadi pendengar dari cerita cintamu dengan orang lain. Aku ingin menjadi bagian dari cerita bahagiamu sendiri. Aku ingin menjadi seseorang yang bisa menemanimu dalam suka maupun duka, mendukung setiap langkahmu, dan tumbuh bersama denganmu.\n\nKarena itu, izinkan aku untuk jujur tentang perasaanku.\n\nUntuk kali ini, izinkan aku menjadi seseorang yang kamu pilih. Izinkan aku menjadikanmu bagian dari hidupku, dan semoga aku juga bisa menjadi bagian dari hidupmu.";
+        
+        const typingElement = document.getElementById('typing-text');
+        const page3Container = document.getElementById('page3');
+        let charIndex = 0;
+        let typingTimeout;
+
+        function startTyping() {
+            typingElement.innerHTML = "";
+            charIndex = 0;
+            typeWriter();
+        }
+
+        function typeWriter() {
+            if (charIndex < isiSurat.length) {
+                if (isiSurat.charAt(charIndex) === '\n') {
+                    typingElement.innerHTML += '<br>';
+                } else {
+                    typingElement.innerHTML += isiSurat.charAt(charIndex);
+                }
+                charIndex++;
+                
+                // Otomatis scroll ke bawah container surat saat teks mengetik agar tidak terpotong di HP
+                page3Container.scrollTop = page3Container.scrollHeight;
+                
+                typingTimeout = setTimeout(typeWriter, 35); // Kecepatan mengetik ramah pembaca
+            } else {
+                document.getElementById('btn-lanjut-tanya').style.display = 'inline-block';
+                document.querySelector('.cursor').style.style.display = 'none';
+                page3Container.scrollTop = page3Container.scrollHeight;
+            }
+        }
+
+        // --- Logika Tombol NO Mengecil & YES Membesar ---
+        const btnNo = document.getElementById('btn-no');
+        const btnYes = document.getElementById('btn-yes');
+        let noClickCount = 0;
+        let yesScale = 1;
+        
+        const noMessages = [
+            "Yakinnn 🥺",
+            "Coba pikir lagi deh 👉👈",
+            "Aku kurang apa 😔",
+            "Masa nggak mau sii 🥺",
+            "POKOKNYA HARUS YES",
+            "Cepetann 🥹"
+        ];
+
+        btnNo.addEventListener('click', function(e) {
+            e.preventDefault();
+            noClickCount++;
+            
+            // 1. Besarkan tombol YES (+20% tiap klik)
+            yesScale += 0.2;
+            btnYes.style.transform = `scale(${yesScale})`;
+
+            // 2. Ganti teks tombol NO secara acak
+            const randomMsg = noMessages[Math.floor(Math.random() * noMessages.length)];
+            btnNo.innerText = randomMsg;
+
+            // 3. Perkecil tombol NO secara bertahap
+            let currentScale = 1 - (noClickCount * 0.12);
+            if (currentScale < 0.2) currentScale = 0.2; // Batas terkecil biar tidak minus
+
+            // 4. Pindahkan posisi tombol NO secara acak (mulai dari klik ke-2)
+            if (noClickCount >= 2) {
+                btnNo.style.position = 'fixed';
+                
+                // Menghitung batas aman pergerakan tombol agar tidak keluar layar gadget
+                const padding = 60;
+                const maxX = window.innerWidth - btnNo.clientWidth - padding;
+                const maxY = window.innerHeight - btnNo.clientHeight - padding;
+                
+                const randomX = Math.max(padding, Math.floor(Math.random() * maxX));
+                const randomY = Math.max(padding, Math.floor(Math.random() * maxY));
+                
+                btnNo.style.left = `${randomX}px`;
+                btnNo.style.top = `${randomY}px`;
+            }
+            
+            btnNo.style.transform = `scale(${currentScale})`;
+
+            // 5. Hilangkan tombol NO jika diklik lebih dari 6 kali
+            if (noClickCount > 6) {
+                btnNo.style.display = 'none';
+            }
+        });
+
+        // Efek Kilau/Sparkle saat hover tombol YES
+        btnYes.addEventListener('mouseover', () => {
+            btnYes.style.boxShadow = "0 0 25px #ff6b81, 0 0 50px #ff6b81";
+        });
+        btnYes.addEventListener('mouseleave', () => {
+            btnYes.style.boxShadow = "0 5px 15px rgba(255, 107, 129, 0.4)";
+        });
+
+        // --- Perayaan Tombol YES ---
+        function showCelebration() {
+            document.getElementById('page4').classList.remove('active');
+            document.getElementById('page5').classList.add('active');
+            createConfetti();
+        }
+
+        function createConfetti() {
+            for (let i = 0; i < 120; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.innerHTML = Math.random() > 0.4 ? '🤍' : '🎉';
+                    confetti.style.position = 'fixed';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.top = '-10vh';
+                    confetti.style.fontSize = (Math.random() * 22 + 12) + 'px';
+                    confetti.style.zIndex = '1000';
+                    confetti.style.pointerEvents = 'none';
+                    confetti.style.animation = `rainFall ${Math.random() * 3 + 2}s linear forwards`;
+                    document.body.appendChild(confetti);
+                    
+                    // Bersihkan elemen sampah dari DOM setelah animasi selesai
+                    setTimeout(() => { confetti.remove(); }, 5000);
+                }, i * 40);
+            }
+        }
+
+        function resetAnimation() {
+            clearTimeout(typingTimeout);
+            location.reload();
+        }
+    </script>
+</body>
+</html>
